@@ -16,25 +16,17 @@ function initLunr() {
             pagesIndex = index;
             // Set up lunrjs by declaring the fields we use
             // Also provide their boost level for the ranking
-            lunrIndex = lunr(function() {
+            lunrIndex = lunr(function () {
+                this.use(lunr.multiLanguage('en', 'jp'));
                 this.ref("uri");
-                this.field('title', {
-		    boost: 15
-                });
-                this.field('tags', {
-		    boost: 10
-                });
-                this.field("content", {
-		    boost: 5
-                });
-				
+                this.field('title', { boost: 15 });
+                this.field("content", { boost: 10 });
+
                 this.pipeline.remove(lunr.stemmer);
                 this.searchPipeline.remove(lunr.stemmer);
-				
+
                 // Feed lunr with each file and let lunr actually index them
-                pagesIndex.forEach(function(page) {
-		    this.add(page);
-                }, this);
+                pagesIndex.forEach(function (page) {this.add(page);}, this);
             })
         })
         .fail(function(jqxhr, textStatus, error) {
@@ -51,7 +43,7 @@ function initLunr() {
  */
 function search(queryTerm) {
     // Find the item in our index corresponding to the lunr one to have more info
-    return lunrIndex.search(queryTerm+"^100"+" "+queryTerm+"*^10"+" "+"*"+queryTerm+"^10"+" "+queryTerm+"~2^1").map(function(result) {
+  return lunrIndex.search(`*${queryTerm}*`).map(function(result) {
             return pagesIndex.filter(function(page) {
                 return page.uri === result.ref;
             })[0];
